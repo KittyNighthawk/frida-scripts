@@ -19,7 +19,7 @@
  const white = "\u001b[37m";
  const bold = "\u001b[1m";
 
-console.log(magenta, "[*] Starting list classes script", reset);
+console.log(magenta, "[*] Starting enumerate classes script", reset);
 
 if(ObjC.available) {
   try {
@@ -35,4 +35,4 @@ if(ObjC.available) {
   console.log(red, "[-] Objective-C runtime is not available.", reset);
 }
 
-console.log(cyan, "[*] LAContext authentication bypass is now running", reset);
+console.log(cyan, "[*] Enumerate classes script complete", reset);
