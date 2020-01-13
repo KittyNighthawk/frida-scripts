@@ -29,7 +29,7 @@
  const white = "\u001b[37m";
  const bold = "\u001b[1m";
 
-console.log(magenta, "[*] Starting UILabel detector script.", reset);
+console.log(magenta, "[*] Starting hidden view detector script.", reset);
 
 if(ObjC.available) {
   try {
@@ -80,3 +80,5 @@ if(ObjC.available) {
 } else {
   console.log(red, "[-] Objective-C runtime is not available.", reset);
 }
+
+console.log(cyan, "[*] Detection of hidden views is now running", reset);
