@@ -12,3 +12,9 @@ You can find the process name using ```frida-ps```:
 ```
 $ frida-ps -Uai
 ```
+
+Some scripts are best run from when the application first starts. In those cases, you can use early instrumentation as shown below:
+
+```
+$ frida -U -l [SCRIPT-NAME] --no-puase -f [APP-IDENTIFIER]
+```
