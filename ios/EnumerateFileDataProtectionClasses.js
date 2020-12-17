@@ -198,11 +198,17 @@ function getDirectoryContents(url) {
     var fsObjects = [];
 
     // For each item in the directory, create a new object
-    var numberOfObjects = contents.count();
+    var numberOfObjects;
+
+    if (contents !== null) {
+        numberOfObjects = contents.count();
+    } else {
+        numberOfObjects = 0;
+    }
 
     for(var i = 0; i < numberOfObjects; i++) {
         var file = contents.objectAtIndex_(i);
-        
+    
         var fsObject = {
             name: file.toString(),
             type: 'Unknown',
@@ -225,51 +231,53 @@ function getDirectoryContents(url) {
         fsObject.writable = write;
 
         var attributes = fileManager.attributesOfItemAtPath_error_(fsObject.url, NULL);
-        fsObject.allAttributes = attributes;
-        var enumerator = attributes.keyEnumerator();
+        if (attributes) {
+            fsObject.allAttributes = attributes;
+            var enumerator = attributes.keyEnumerator();
 
-        var key;
-        while ((key = enumerator.nextObject()) !== null) {
-            if (key == "NSFileProtectionKey") {
-                var value = attributes.objectForKey_(key);
-                if (value) {
-                    fsObject.dataProtectionClass = value;
-                } else {
-                    fsObject.dataProtectionClass = "NSFileProtectionNone";
-                }
-            } else if (key == "NSFileType") {
-                var value = attributes.objectForKey_(key);
-                if (value) {
-                    fsObject.type = NSFileAttributeType[value];
-                    if (value == NSFileAttributeType["NSFileTypeDirectory"]) {
-                        fsObject.isDirectory = true;
+            var key;
+            while ((key = enumerator.nextObject()) !== null) {
+                if (key == "NSFileProtectionKey") {
+                    var value = attributes.objectForKey_(key);
+                    if (value) {
+                        fsObject.dataProtectionClass = value;
                     } else {
-                        fsObject.isDirectory = false;
+                        fsObject.dataProtectionClass = "NSFileProtectionNone";
                     }
-                }
-            } else if (key == "NSFileOwnerAccountName") {
-                var value = attributes.objectForKey_(key);
-                if (value) {
-                    fsObject.owner = value;
-                }
-            } else if (key == "NSFileGroupOwnerAccountName") {
-                var value = attributes.objectForKey_(key);
-                if (value) {
-                    fsObject.group = value;
-                }
-            } else if (key == "NSFileCreationDate") {
-                var value = attributes.objectForKey_(key);
-                if (value) {
-                    fsObject.createdTime = value;
-                }
-            } else if (key == "NSFileModificationDate") {
-                var value = attributes.objectForKey_(key);
-                if (value) {
-                    fsObject.modifiedTime = value;
-                }
-            } else { continue; }
+                } else if (key == "NSFileType") {
+                    var value = attributes.objectForKey_(key);
+                    if (value) {
+                        fsObject.type = NSFileAttributeType[value];
+                        if (value == NSFileAttributeType["NSFileTypeDirectory"]) {
+                            fsObject.isDirectory = true;
+                        } else {
+                            fsObject.isDirectory = false;
+                        }
+                    }
+                } else if (key == "NSFileOwnerAccountName") {
+                    var value = attributes.objectForKey_(key);
+                    if (value) {
+                        fsObject.owner = value;
+                    }
+                } else if (key == "NSFileGroupOwnerAccountName") {
+                    var value = attributes.objectForKey_(key);
+                    if (value) {
+                        fsObject.group = value;
+                    }
+                } else if (key == "NSFileCreationDate") {
+                    var value = attributes.objectForKey_(key);
+                    if (value) {
+                        fsObject.createdTime = value;
+                    }
+                } else if (key == "NSFileModificationDate") {
+                    var value = attributes.objectForKey_(key);
+                    if (value) {
+                        fsObject.modifiedTime = value;
+                    }
+                } else { continue; }
+            }
         }
-
+        
         /* Example attributes
         NSFileOwnerAccountID 501
         NSFileSystemFileNumber 12885684640
