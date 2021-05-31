@@ -5,26 +5,26 @@
  * protection classes. Additionally, options can be enabled to filter out secure file system objects and create a CSV
  * output of the files found to be placed into evidence tables.
  * 
- * Created by KittyNighthawk (2020)
+ * Created by KittyNighthawk (2021)
  */
 
 //MARK: - ANSII Colours
-const reset = "\x1b[0m";
-const black = "\u001b[30m";
-const red = "\u001b[31m";
-const green = "\u001b[32m";
-const yellow = "\u001b[33m";
-const blue = "\u001b[34m";
-const magenta = "\u001b[35m";
-const cyan = "\u001b[36m";
-const white = "\u001b[37m";
-const bold = "\u001b[1m";
+const RESET = "\x1b[0m";
+const BLACK = "\u001b[30m";
+const RED = "\u001b[31m";
+const GREEN = "\u001b[32m";
+const YELLOW = "\u001b[33m";
+const BLUE = "\u001b[34m";
+const MAGENTA = "\u001b[35m";
+const CYAN = "\u001b[36m";
+const WHITE = "\u001b[37m";
+const BOLD = "\u001b[1m";
 
 //MARK: - Options
 // This will display the environment URLs for the application
 const SHOW_ENVIRONMENT_URLS = true;
 //  This will output all environment URLs for the application (if SHOW_ENVIRONMENT_URLS is true)
-const SHOW_ALL_ENVIRONMENT_URLS = false;
+const SHOW_ALL_ENVIRONMENT_URLS = true;
 // This will filter out any file system objects that are considered secure or exempt
 const FILTER_DATA_PROTECTION_CLASSES = false;
 // This will output the results as a list on the CLI
@@ -129,17 +129,17 @@ const users = {
 // fsObjects holds enumerated fsObjects
 var fsObjects = [];
 
-console.log(magenta, "[*] Enumerating filesystem objects for the application\n", reset); 
+console.log(`${MAGENTA}[*] Enumerating filesystem objects for the application${RESET}\n`); 
 
 // This is the entry point for this script
 if(ObjC.available) {
     try {
         main();
     } catch(err) {
-        console.log(red, "[!] An exception occured: ", reset, err.message);
+        console.log(`${RED}[!] An exception occured: ${RESET}${err.message}\n`);
     }
 } else {
-    console.log(red, "[-] Objective-C runtime is not available.", reset);
+    console.log(`${RED}[-] Objective-C runtime is not available${RESET}`);
 }
 
 // getURLForLocation takes in a NSSearchPathDirectory (int) and NSSearchPathDomainMask (int) and returns the URL for that location
@@ -170,19 +170,19 @@ function cleanURL(url) {
 // or all possible paths
 function printCorePaths(allPaths = false) {
     if (!allPaths) {
-        console.log(green, "[*] Application environment URLs:", reset)
-        console.log(green, "[+] Bundle:", bundleManager.bundlePath(), reset);
-        console.log(green, "[+] Documents:", getURLForLocation(NSSearchPathDirectory.NSDocumentDirectory, NSSearchPathDomainMask.NSUserDomainMask), reset);
-        console.log(green, "[+] Library:", getURLForLocation(NSSearchPathDirectory.NSLibraryDirectory, NSSearchPathDomainMask.NSUserDomainMask), reset);
+        console.log(`${GREEN}[*] Application environment URLs:${RESET}`);
+        console.log(`${GREEN}[+] Bundle: ${bundleManager.bundlePath()}${RESET}`);
+        console.log(`${GREEN}[+] Documents: ${getURLForLocation(NSSearchPathDirectory.NSDocumentDirectory, NSSearchPathDomainMask.NSUserDomainMask)}${RESET}`);
+        console.log(`${GREEN}[+] Library: ${getURLForLocation(NSSearchPathDirectory.NSLibraryDirectory, NSSearchPathDomainMask.NSUserDomainMask)}${RESET}`);
         console.log("");
     } else {
-        console.log(green, "[*] Application environment URLs:", reset)
+        console.log(`${GREEN}[*] Application environment URLs:${RESET}`)
         for (var key in NSSearchPathDirectory) {
             const path = getURLForLocation(NSSearchPathDirectory[key], NSSearchPathDomainMask.NSUserDomainMask);
             if(path) {
-                console.log(green, "[+] ".concat(key, ": ", path, reset));
+                console.log(`${GREEN}[+] ${key}: ${path}${RESET}`);
             } else {
-                console.log(green, "[+] ".concat(key, ": -", reset));
+                console.log(`${GREEN}[+] ${key}: -${RESET}`);
             }
         }
         console.log("");
@@ -300,19 +300,19 @@ function getDirectoryContents(url) {
         fsObjects.push(fsObject);
 
         if (DEBUG_ENABLED) {
-            console.log(green, "[[DBG]] Name:", fsObject.name, reset);
-            console.log(green, "[[DBG]] Type:", fsObject.type, reset);
-            console.log(green, "[[DBG]] URL:", fsObject.url, reset);
-            console.log(green, "[[DBG]] Owner:", fsObject.owner, reset);
-            console.log(green, "[[DBG]] Group:", fsObject.group, reset);
-            console.log(green, "[[DBG]] Readable:", fsObject.readable, reset);
-            console.log(green, "[[DBG]] Writable:", fsObject.writable, reset);
-            console.log(green, "[[DBG]] Created:", fsObject.createdTime, reset);
-            console.log(green, "[[DBG]] Modified:", fsObject.modifiedTime, reset);
+            console.log(`${GREEN}[[DBG]] Name: ${fsObject.name}${RESET}`);
+            console.log(`${GREEN}[[DBG]] Type: ${fsObject.type}${RESET}`);
+            console.log(`${GREEN}[[DBG]] URL: ${fsObject.url}${RESET}`);
+            console.log(`${GREEN}[[DBG]] Owner: ${fsObject.owner}${RESET}`);
+            console.log(`${GREEN}[[DBG]] Group: ${fsObject.group}${RESET}`);
+            console.log(`${GREEN}[[DBG]] Readable: ${fsObject.readable}${RESET}`);
+            console.log(`${GREEN}[[DBG]] Writable: ${fsObject.writable}${RESET}`);
+            console.log(`${GREEN}[[DBG]] Created: ${fsObject.createdTime}${RESET}`);
+            console.log(`${GREEN}[[DBG]] Modified: ${fsObject.modifiedTime}${RESET}`);
             if (fsObject.dataProtectionClass != "") {
-                console.log(green, "[[DBG]] Data protection class:", fsObject.dataProtectionClass, reset);
+                console.log(`${GREEN}[[DBG]] Data protection class: ${fsObject.dataProtectionClass}${RESET}`);
             } else {
-                console.log(green, "[[DBG]] Data protection class: NSFileProtectionNone", reset);
+                console.log(`${GREEN}[[DBG]] Data protection class: NSFileProtectionNone${RESET}`);
             }
             console.log();
         } 
@@ -371,7 +371,7 @@ function formatAsCSV(fsObjects, verbosityLevel = 1) {
                         content += fsObject.modifiedTime + "\n";
                         break;
                     default:
-                        console.log(red, "[ERROR] There was an error formatting the CSV content", reset);
+                        console.log(`${RED}[ERROR] There was an error formatting the CSV content${RESET}`);
                         break;
                 }
             }
@@ -379,9 +379,9 @@ function formatAsCSV(fsObjects, verbosityLevel = 1) {
     }
     
     recurseFsObject(fsObjects);
-    console.log(green, "*** COPY EVERYTHING BETWEEN THESE GREEN LINES ***", reset);
+    console.log(`${GREEN}*** COPY EVERYTHING BETWEEN THESE GREEN LINES ***${RESET}`);
     console.log(content);
-    console.log(green, "*** NOW SAVE AS A CSV FILE ***", reset);
+    console.log(`${GREEN}*** NOW SAVE AS A CSV FILE ***${RESET}`);
 }
 
 // Turns an array of file system objects into a list displayed in the CLI. The verbosity level determines how much 
@@ -394,30 +394,30 @@ function formatAsList(fsObjects, verbosityLevel = 1) {
             } else if (typeof fsObject.type !== 'undefined') {
                 switch (verbosityLevel) {
                     case 1:
-                        console.log("Name:", fsObject.name);
-                        console.log("Type:", fsObject.type);
-                        console.log("URL:", fsObject.url);
-                        console.log("Readable:", fsObject.readable);
-                        console.log("Writable:", fsObject.writable);
+                        console.log(`Name: ${fsObject.name}`);
+                        console.log(`Type: ${fsObject.type}`);
+                        console.log(`URL: ${fsObject.url}`);
+                        console.log(`Readable: ${fsObject.readable}`);
+                        console.log(`Writable: ${fsObject.writable}`);
                         if (fsObject.dataProtectionClass != "") {
-                            console.log("Data protection class:", fsObject.dataProtectionClass);
+                            console.log(`Data protection class: ${fsObject.dataProtectionClass}`);
                         } else {
                             console.log("Data protection class: None");
                         }
                         console.log();
                         break;
                     case 2:
-                        console.log("Name:", fsObject.name);
-                        console.log("Type:", fsObject.type);
-                        console.log("URL:", fsObject.url);
-                        console.log("Owner:", fsObject.owner);
-                        console.log("Group:", fsObject.group);
-                        console.log("Readable:", fsObject.readable);
-                        console.log("Writable:", fsObject.writable);
-                        console.log("Created:", fsObject.createdTime);
-                        console.log("Modified:", fsObject.modifiedTime);
+                        console.log(`Name: ${fsObject.name}`);
+                        console.log(`Type: ${fsObject.type}`);
+                        console.log(`URL: ${fsObject.url}`);
+                        console.log(`Owner: ${fsObject.owner}`);
+                        console.log(`Group: ${fsObject.group}`);
+                        console.log(`Readable: ${fsObject.readable}`);
+                        console.log(`Writable: ${fsObject.writable}`);
+                        console.log(`Created: ${fsObject.createdTime}`);
+                        console.log(`Modified: ${fsObject.modifiedTime}`);
                         if (fsObject.dataProtectionClass != "") {
-                            console.log("Data protection class:", fsObject.dataProtectionClass);
+                            console.log(`Data protection class: ${fsObject.dataProtectionClass}`);
                         } else {
                             console.log("Data protection class: None");
                         }
@@ -489,7 +489,7 @@ function main() {
     var fsItems = [];
 
     if (DEBUG_ENABLED) {
-        console.log(green, "Enumerating objects from:", applicationRootPath, reset);
+        console.log(`${GREEN}Enumerating objects from: ${applicationRootPath}${RESET}`);
     }
     
     if (SHOW_ENVIRONMENT_URLS) {
