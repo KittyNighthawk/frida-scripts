@@ -5,7 +5,7 @@
  * protection classes. Additionally, options can be enabled to filter out secure file system objects and create a CSV
  * output of the files found to be placed into evidence tables.
  * 
- * Created by KittyNighthawk (2021)
+ * Created by KittyNighthawk (2022)
  */
 
 //MARK: - ANSII Colours
@@ -22,9 +22,9 @@ const BOLD = "\u001b[1m";
 
 //MARK: - Options
 // This will display the environment URLs for the application
-const SHOW_ENVIRONMENT_URLS = true;
+const SHOW_ENVIRONMENT_URLS = false;
 //  This will output all environment URLs for the application (if SHOW_ENVIRONMENT_URLS is true)
-const SHOW_ALL_ENVIRONMENT_URLS = true;
+const SHOW_ALL_ENVIRONMENT_URLS = false;
 // This will filter out any file system objects that are considered secure or exempt
 const FILTER_DATA_PROTECTION_CLASSES = false;
 // This will output the results as a list on the CLI
@@ -33,10 +33,10 @@ const OUTPUT_AS_LIST = true;
 const OUTPUT_AS_CSV = false;
 // For debugging
 const DEBUG_ENABLED = false;
-// 1 (name, type, URL, readable, writable, data protection class)
-// 2 (name, type, URL, readable, writable, owner, group, data protection class, created time, modified time)
+// 1 (name, type, URL, readable, writable, posixPermissions, data protection class)
+// 2 (name, type, URL, readable, writable, posixPermissions, owner, group, data protection class, created time, modified time)
 // Affects both list and CSV formats
-const VERBOSITY_LEVEL = 1;
+const VERBOSITY_LEVEL = 2;
 
 //MARK: - Properties
 const NSFileManager = ObjC.classes.NSFileManager;
@@ -218,6 +218,7 @@ function getDirectoryContents(url) {
             group: 'Unknown',
             readable: false,
             writable: false,
+            posixPermissions: 'Unknown',
             dataProtectionClass: '',
             createdTime: 'Unknown',
             modifiedTime: 'Unknown',
@@ -264,6 +265,11 @@ function getDirectoryContents(url) {
                     if (value) {
                         fsObject.group = value;
                     }
+                } else if (key == "NSFilePosixPermissions") {
+                    var value = attributes.objectForKey_(key);
+                    if (value) {
+                        fsObject.posixPermissions = parseInt(value.toString()).toString(8);
+                    }
                 } else if (key == "NSFileCreationDate") {
                     var value = attributes.objectForKey_(key);
                     if (value) {
@@ -307,6 +313,7 @@ function getDirectoryContents(url) {
             console.log(`${GREEN}[[DBG]] Group: ${fsObject.group}${RESET}`);
             console.log(`${GREEN}[[DBG]] Readable: ${fsObject.readable}${RESET}`);
             console.log(`${GREEN}[[DBG]] Writable: ${fsObject.writable}${RESET}`);
+            console.log(`${GREEN}[[DBG]] Permissions: ${fsObject.posixPermissions}${RESET}`);
             console.log(`${GREEN}[[DBG]] Created: ${fsObject.createdTime}${RESET}`);
             console.log(`${GREEN}[[DBG]] Modified: ${fsObject.modifiedTime}${RESET}`);
             if (fsObject.dataProtectionClass != "") {
@@ -336,12 +343,12 @@ function formatAsCSV(fsObjects, verbosityLevel = 1) {
     var content = "";
 
     if (verbosityLevel == 1) {
-        content += "name,type,url,readable,writable,data-protection-class\n";
+        content += "name,type,url,readable,writable,posixPermissions,data-protection-class";
     } else if (verbosityLevel == 2) {
-        content += "name,type,url,owner,group,readable,writable,data-protection-class,createOn,lastModifiedOn\n";
+        content += "name,type,url,owner,group,readable,writable,posixPermissions,data-protection-class,createOn,lastModifiedOn";
     }
 
-    //var content = "name,type,url,readable,writable,data-protection-class\n";
+    console.log(content);
 
     var recurseFsObject = function (arr) {
         arr.forEach(function (fsObject) {
@@ -351,36 +358,37 @@ function formatAsCSV(fsObjects, verbosityLevel = 1) {
             if (typeof fsObject.type !== 'undefined') {
                 switch (verbosityLevel) {
                     case 1:
-                        content += fsObject.name + ",";
+                        content = fsObject.name + ",";
                         content += fsObject.type + ",";
                         content += fsObject.url + ",";
                         content += fsObject.readable + ",";
                         content += fsObject.writable + ",";
-                        content += fsObject.dataProtectionClass + "\n";
+                        content += fsObject.posixPermissions + ",";
+                        content += fsObject.dataProtectionClass;
                         break;
                     case 2:
-                        content += fsObject.name + ",";
+                        content = fsObject.name + ",";
                         content += fsObject.type + ",";
                         content += fsObject.url + ",";
                         content += fsObject.owner + ",";
                         content += fsObject.group + ",";
                         content += fsObject.readable + ",";
                         content += fsObject.writable + ",";
+                        content += fsObject.posixPermissions + ",";
                         content += fsObject.dataProtectionClass + ",";
                         content += fsObject.createdTime + ",";
-                        content += fsObject.modifiedTime + "\n";
+                        content += fsObject.modifiedTime;
                         break;
                     default:
                         console.log(`${RED}[ERROR] There was an error formatting the CSV content${RESET}`);
                         break;
                 }
             }
+            console.log(content);
         });
     }
-    
-    recurseFsObject(fsObjects);
     console.log(`${GREEN}*** COPY EVERYTHING BETWEEN THESE GREEN LINES ***${RESET}`);
-    console.log(content);
+    recurseFsObject(fsObjects);
     console.log(`${GREEN}*** NOW SAVE AS A CSV FILE ***${RESET}`);
 }
 
@@ -399,6 +407,7 @@ function formatAsList(fsObjects, verbosityLevel = 1) {
                         console.log(`URL: ${fsObject.url}`);
                         console.log(`Readable: ${fsObject.readable}`);
                         console.log(`Writable: ${fsObject.writable}`);
+                        console.log(`Permissions: ${fsObject.posixPermissions}`);
                         if (fsObject.dataProtectionClass != "") {
                             console.log(`Data protection class: ${fsObject.dataProtectionClass}`);
                         } else {
@@ -414,6 +423,7 @@ function formatAsList(fsObjects, verbosityLevel = 1) {
                         console.log(`Group: ${fsObject.group}`);
                         console.log(`Readable: ${fsObject.readable}`);
                         console.log(`Writable: ${fsObject.writable}`);
+                        console.log(`Permissions: ${fsObject.posixPermissions}`);
                         console.log(`Created: ${fsObject.createdTime}`);
                         console.log(`Modified: ${fsObject.modifiedTime}`);
                         if (fsObject.dataProtectionClass != "") {
